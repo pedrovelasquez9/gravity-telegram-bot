@@ -5,8 +5,41 @@ const bot = new TeleBot({
   token: constants.TOKEN,
 });
 
+DEFAULT_MESSAGE = `📢 Disculpa, no he entendido tu pregunta, puedes escribir "servicios" para conocer nuestros servicios o puedes ver las opciones disponibles escribiendo /ayuda`;
+
+const DEFAULT_COMMANDS = [
+    "/start",
+    "/hola",
+    "/services",
+    "/about",
+    "/info",
+    "/help",
+    "/ayuda"
+]
+
+const GREETINGS_KEYWORKDS = [
+    "hola",
+    "cómo estás?",
+    "como estas",
+    "dime algo",
+    "di algo",
+    "buenas tardes",
+    "buenos dias",
+    "buenas noches",
+    "buenos días",
+    "buenas",
+    "hello",
+    "start"
+]
+
+const SERVICES_KEYWORKDS = [
+    "servicios",
+    "services",
+    "servicio"
+]
+
 //our command
-bot.on(["/start"], (msg) => {
+bot.on(["/start", "/hola"], (msg) => {
   //all the information about user will come with the msg
   let replyMarkup = bot.inlineKeyboard([
     [
@@ -31,7 +64,7 @@ bot.on(["/services"], (msg) => {
     `)
 })
 
-bot.on(["/about"], (msg) => {
+bot.on(["/about", "/info"], (msg) => {
     bot.sendMessage(msg.from.id, `
         Somos una empresa llena de gente friki con múltiples y distintos desórdenes de personalidad.
 
@@ -43,9 +76,44 @@ bot.on(["/about"], (msg) => {
     `)
 })
 
+bot.on(["/help", "/ayuda"], (msg) => {
+    bot.sendMessage(msg.from.id, `
+        Comandos disponibles:
+        /hola
+        /servicios
+        /ayuda,
+        /info
+    `)
+})
+
 bot.on('callbackQuery', msg => {
     // User message alert
     bot.event(msg.data, msg);
+});
+
+// Mod every text message
+bot.mod('text', data => {
+    let textArray = data.message.text.split(" ");
+    let askForServices = textArray.map(function(word) { 
+        return SERVICES_KEYWORKDS.indexOf(word.toLowerCase()) !== -1 ; 
+    })
+    let greetings = textArray.map((word) => {
+        return GREETINGS_KEYWORKDS.indexOf(word.toLowerCase()) !== -1 ; 
+    })
+
+    if(data){
+        if(DEFAULT_COMMANDS.indexOf(data.message.text) !== -1){
+            bot.event(data.message.text, data.message);
+        }else if(askForServices){
+            bot.event("/services", data.message);
+        }else if(greetings){
+            bot.event("/hola", data.message);
+        }else{
+            console.log("entra")
+            console.log(data.message.from)
+            bot.sendMessage(data.message.from.id, DEFAULT_MESSAGE)
+        }
+    }
 });
 
 //start polling
