@@ -1,4 +1,4 @@
-TOKEN = "1510866698:AAFxRghsmEIeuunZTDcRagZvx4GDyIxZ6_4";
+TOKEN = "MY_TELEGRAM_API_KEY";
 
 module.exports = {
     TOKEN
